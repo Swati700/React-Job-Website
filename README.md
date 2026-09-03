@@ -45,7 +45,7 @@ src/
 
 ---
 
-## 🌐 Routes
+## ➡️ Routes
 
 | Route       | Description        |
 | ----------- | ------------------ |
@@ -89,5 +89,10 @@ Through this project, I learned:
 * API fetching
 * Tailwind CSS styling
 * Form handling in React
+
+---
+
+## 🌐 Live Preview
+- https://react-job-website-five.vercel.app/
 
 ---
