@@ -5,6 +5,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import JobsPage from "./pages/JobsPage";
@@ -13,41 +14,84 @@ import JobPage, { jobLoader } from "./pages/JobPage";
 import AddJobPage from "./pages/AddJobPage";
 import EditJobPage from "./pages/EditJobPage";
 
-// We are rendering the router in our app.
 const App = () => {
-  // Add new job
+  // Add new job to Supabase
   const addJob = async (newJob) => {
-    const res = await fetch("/api/jobs", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newJob),
-    });
-    return;
+    try {
+      const { data, error } = await supabase
+        .from("jobs")
+        .insert([newJob])
+        .select();
+
+      if (error) {
+        console.error("Error adding job:", error);
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      console.error("Failed to add job:", error.message);
+      throw error;
+    }
   };
 
-  // Delete job
+  // Delete job from Supabase
   const deleteJob = async (id) => {
-    const res = await fetch(`/api/jobs/${id}`, {
-      method: "DELETE",
-    });
-    return;
+    try {
+      const { error } = await supabase
+        .from("jobs")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting job:", error);
+        throw error;
+      }
+    } catch (error) {
+      console.error("Failed to delete job:", error.message);
+      throw error;
+    }
   };
 
-  // Update job
+  // Update job in Supabase
   const updateJob = async (job) => {
-    const res = await fetch(`/api/jobs/${job.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(job),
-    });
-    return;
+    try {
+      const { data, error } = await supabase
+        .from("jobs")
+        .update(job)
+        .eq("id", job.id)
+        .select();
+
+      if (error) {
+        console.error("Error updating job:", error);
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      console.error("Failed to update job:", error.message);
+      throw error;
+    }
   };
 
-  // Here we are using React Router to create a router for our app.
+  // Loader to fetch single job from Supabase
+  const jobLoaderWithSupabase = async ({ params }) => {
+    try {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("id", params.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching job:", error);
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch job:", error.message);
+      throw error;
+    }
+  };
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<MainLayout />}>
@@ -57,12 +101,12 @@ const App = () => {
         <Route
           path="/edit-job/:id"
           element={<EditJobPage updateJobSubmit={updateJob} />}
-          loader={jobLoader}
+          loader={jobLoaderWithSupabase}
         />
         <Route
           path="/jobs/:id"
           element={<JobPage deleteJob={deleteJob} />}
-          loader={jobLoader}
+          loader={jobLoaderWithSupabase}
         />
         <Route path="*" element={<NotFoundPage />} />
       </Route>,
