@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,7 +7,6 @@ import { supabase } from "../supabaseClient";
 
 const JobPage = ({ deleteJob }) => {
   const navigate = useNavigate();
-  const { id } = useParams();
   const job = useLoaderData();
 
   const onDeleteClick = async (jobId) => {
